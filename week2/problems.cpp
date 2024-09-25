@@ -1,5 +1,5 @@
 #include <iostream>
-
+using namespace std;
 struct Node {
     int val;
     Node* next;
@@ -162,6 +162,155 @@ Node* removeNthFromEnd(Node* head, int n) {
     }
     prev->next = ptr->next;
     return tmp->next;
+}
+/*
+    Function to perform character shifts on a string based on the given shift values.
+
+    Share 2 questions you would ask to help understand the question:
+    - How should the shifts behave for large values (e.g., shifts greater than 26)?
+    - Should the result wrap around 'z' and continue from 'a' when shifting past the end of the alphabet?
+
+    List out 2-3 types of problems that we might consider and our belief of match:
+    - Handling large shift values: Likely (as we use modulo 26 to handle values greater than 26)
+    - Calculating prefix sums for shifts: Likely (since we need to accumulate shifts)
+    - Handling character wrapping: Likely (since we need to ensure shifts past 'z' wrap to 'a')
+
+    Write out in plain English what you want to do:
+    - We need to apply character shifts to each letter in the string based on the given shift values.
+      First, we compute the prefix sum of the shifts to accumulate the total shift for each character.
+      Then, for each character in the string, we apply the corresponding shift, wrapping around if necessary.
+
+    Translate each sub-problem into pseudocode:
+    1. Initialize a prefix sum array from the shifts array, starting from the last shift value and moving left.
+    2. Traverse the string and apply the appropriate shift to each character, using modulo 26 for wrapping.
+    3. Return the shifted string as the result.
+
+    Share at least one strong/weak area of your algorithm or future potential work:
+    - Strength: Efficient computation of prefix sums and character shifts ensures the solution works in linear time.
+    - Weakness: The algorithm could be more optimized by applying shifts in-place, rather than creating a new string.
+*/
+string shiftingLetters(string s, vector<int>& shifts) {
+    vector<int> prefix_sums(shifts.size(), 0);
+    prefix_sums[prefix_sums.size() - 1] = shifts[shifts.size() - 1];
+    for (int i = prefix_sums.size() - 2; i >=0; --i) {
+       prefix_sums[i] = (prefix_sums[i+1] + shifts[i]) % 26;
+    }
+
+
+    string res = "";
+    for (int i = 0; i < s.size(); ++i) {
+        res += (s[i] - 'a' + prefix_sums[i]) % 26 + 'a';
+    }
+    return res;
+}
+/*
+    Function to set matrix elements to zero if a zero is found in any row or column.
+
+    Share 2 questions you would ask to help understand the question:
+    - Should we use additional space to track which rows and columns should be zeroed out, or can we modify the matrix in-place?
+    - How should we handle the first row and first column, which are used to mark zeroes for the rest of the matrix?
+
+    List out 2-3 types of problems that we might consider and our belief of match:
+    - In-place matrix modification: Likely (as we use the first row and first column to store flags)
+    - Handling matrix boundaries: Likely (since we treat the first row and column specially)
+    - Ensuring pointer safety when modifying the matrix: Neutral (since we handle pointer safety implicitly in C++)
+
+    Write out in plain English what you want to do:
+    - We need to set all elements in a row or column to zero if a zero is found in that row or column.
+      We'll use the first row and column of the matrix to mark which rows and columns should be zeroed, and then update the matrix accordingly.
+
+    Translate each sub-problem into pseudocode:
+    1. Check if the first column contains any zeros and set a flag if it does.
+    2. Traverse the matrix and mark the first row and first column if a zero is found.
+    3. Update the rest of the matrix based on the flags in the first row and column.
+    4. Zero out the first row and column if necessary, based on the initial flags.
+
+    Share at least one strong/weak area of your algorithm or future potential work:
+    - Strength: The algorithm operates in-place without using additional space, making it memory efficient.
+    - Weakness: The logic for handling the first row and column separately adds complexity that can lead to edge cases if not handled carefully.
+*/
+
+void setZeroes(vector<vector<int>>& matrix) {
+    bool isCol = false;
+    int R = matrix.size();
+    int C = matrix[0].size();
+    for (int i = 0; i < R; i++) {
+        if (matrix[i][0] == 0) {
+            isCol = true;
+        }
+        for (int j = 1; j < C; j++) {
+            if (matrix[i][j] == 0) {
+                matrix[0][j] = 0;
+                matrix[i][0] = 0;
+            }
+        }
+    }
+    for (int i = 1; i < R; i++) {
+        for (int j = 1; j < C; j++) {
+            if (matrix[i][0] == 0 || matrix[0][j] == 0) {
+                matrix[i][j] = 0;
+            }
+        }
+    }
+    if (matrix[0][0] == 0) {
+        for (int j = 0; j < C; j++) {
+            matrix[0][j] = 0;
+        }
+    }
+    if (isCol) {
+        for (int i = 0; i < R; i++) {
+            matrix[i][0] = 0;
+        }
+    }
+}
+/*
+    Function to find the length of the longest substring that can be obtained by replacing at most `k` characters.
+
+    Share 2 questions you would ask to help understand the question:
+    - Should the character replacement be case-sensitive, or should we treat both uppercase and lowercase characters as the same?
+    - How should the algorithm handle substrings that include non-alphabetical characters, or are they guaranteed to only contain lowercase letters?
+
+    List out 2-3 types of problems that we might consider and our belief of match:
+    - Sliding window technique: Likely (since we are moving the `left` and `right` pointers to adjust the window of consideration)
+    - Handling multiple character replacements: Likely (as we need to keep track of how many replacements we’ve used with `k`)
+    - Finding the optimal solution by brute force over all possible target characters: Likely (since we iterate over all possible letters and check their validity)
+
+    Write out in plain English what you want to do:
+    - For each character in the alphabet, treat that character as the one we want to maximize in the string. 
+      Then, using a sliding window approach, count how many replacements (non-matching characters) we can make to form a valid substring of maximal length, keeping track of the longest valid substring.
+
+    Translate each sub-problem into pseudocode:
+    1. Initialize `maxlen` to store the length of the longest valid substring found.
+    2. For each character in the alphabet:
+       a. Use a sliding window approach to check the longest substring that can be formed by replacing at most `k` characters with the current target character.
+       b. For each non-matching character encountered, decrement `numk`.
+       c. If `numk` is negative (indicating we’ve used up all replacements), move the `left` pointer to shrink the window and adjust `numk`.
+    3. Return the maximum length found across all possible target characters.
+
+    Share at least one strong/weak area of your algorithm or future potential work:
+    - Strength: The algorithm uses a sliding window approach to efficiently find the longest valid substring for each character.
+    - Weakness: The algorithm checks all 26 characters, which increases the runtime. It could potentially be optimized by tracking the most frequent character in the window instead of iterating over every character.
+*/
+
+int characterreplacement(string s, int k) {
+    int maxlen = 0;
+    for (int i = 0; i < 26; ++i) {
+        char ch = 'a' + i;
+        int left = 0; 
+        int numk = k;
+        for (int right = 0; right < s.length(); ++right) {
+            if (s[right] != ch) {
+                numk--; 
+                if (numk < 0) {
+                    while (s[left] == ch) left++;
+                    left++;
+                    numk++;
+                }
+            }
+            maxlen = max(right - left + 1, maxlen);
+        }
+    }
+    return maxlen;
 }
 
 
