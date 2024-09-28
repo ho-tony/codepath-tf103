@@ -4,6 +4,92 @@
 using namespace std;
 
 void helper(size_t, vector<int> & nums);
+bool knows(const int a, const int b);
+
+int findCelebrity(int n) {
+    vector<int> people_everyone_knows;
+    for (int i = 0; i < n; ++i) {
+        bool isKnown = true;
+        for (int j = 0; j < n; ++j) {
+            if (!knows(j, i)) {
+                isKnown = false;
+                break;
+            }
+        }
+        if (isKnown) {
+            people_everyone_knows.push_back(i);
+        }
+    }
+    if (people_everyone_knows.size() == 0) {
+        return -1;
+    }
+    for (const auto& person : people_everyone_knows) {
+        bool knows_someone = false;
+        for (int i = 0; i < n; ++i) {
+            if (person == i) continue;
+            if (knows(person, i)) {
+                knows_someone = true;
+                break;
+            }
+        }
+        if (!knows_someone) {
+            return person;
+        }
+    }
+    return -1;
+}
+
+int leastBricks(vector<vector<int>>& wall) {
+    unordered_map<long, long> openings;
+    for (int r = 0; r < wall.size(); ++r) {
+        long part = 0;
+        for (int c = 0; c < wall[r].size() - 1; ++c) {
+            part += (long)wall[r][c];
+            openings[part]++;
+        }
+    }
+    long max_openings = 0;
+    for (const auto& open : openings) {
+        max_openings = max(max_openings, open.second);
+    }
+    return wall.size() - max_openings;
+}
+
+
+// for the love of god do not do this in c++, lambda function are way to strict!
+int leastInterval(vector<char>& tasks, int n) {
+    unordered_map<char, int> freq_map;
+    auto lambda = [&freq_map](const char& a, const char& b) {
+        return freq_map[b] > freq_map[a];
+    };
+    priority_queue<char, vector<char>, decltype(lambda)> pq(lambda);
+    for (const auto& t : tasks)
+        freq_map[t]++;
+    for (const auto& t : freq_map)
+        pq.push(t.first);
+    int time = 0;
+    while (!pq.empty()) {
+        int tmp = n+1;
+        vector<char> next;
+        int cnt = 0;
+        while (tmp-- && !pq.empty()) {
+            auto top = pq.top();
+            pq.pop();
+            freq_map[top]--;
+            if (freq_map[top] > 0) {
+                next.push_back(top);
+            }
+
+            cnt++;
+        }
+        for (const auto & ch : next) {
+            pq.push(ch);
+        }
+        time += (pq.empty()) ? cnt : n + 1;
+        
+    }
+    return time;
+}
 
 /* 
 Questions:
