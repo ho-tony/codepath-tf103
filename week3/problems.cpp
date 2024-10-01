@@ -5,7 +5,26 @@ using namespace std;
 
 void helper(size_t, vector<int> & nums);
 bool knows(const int a, const int b);
+/*
+Questions:
+1. How do we determine if someone is a celebrity?
+   Answer: A celebrity is known by everyone but knows no one. We check for these two conditions.
+2. How do we optimize the search for a celebrity?
+   Answer: First, we find people who are known by everyone. Then, we check if they know anyone else.
 
+Types of Problems:
+- Likely: Problems involving social graphs, relationships, or celebrity identification.
+- Unlikely: Problems not involving pairwise relationships or hierarchy.
+
+Plain English Explanation:
+We want to find if there's a person (celebrity) in a group of people such that this person is known by everyone but knows no one else. We check each person to see if they meet these conditions.
+
+Pseudocode:
+1. Loop through all people to find candidates who are known by everyone.
+2. For each candidate, check if they know anyone.
+3. If a candidate doesn't know anyone, return their index as the celebrity.
+4. If no valid candidate is found, return -1.
+*/
 int findCelebrity(int n) {
     vector<int> people_everyone_knows;
     for (int i = 0; i < n; ++i) {
@@ -38,7 +57,26 @@ int findCelebrity(int n) {
     }
     return -1;
 }
+/*
+Questions:
+1. How do we minimize the number of crossed bricks?
+   Answer: By finding the most frequent brick edges where we can place the vertical line.
+2. Why do we skip the last brick in each row?
+   Answer: The last brick forms the wall's outer edge, so the vertical line cannot cross beyond the wall.
 
+Types of Problems:
+- Likely: Problems related to finding optimal cuts or lines, or partitioning data.
+- Unlikely: Problems not involving geometry or partitions.
+
+Plain English Explanation:
+We want to draw a vertical line through a brick wall such that the number of crossed bricks is minimized. By tracking where the brick edges align (except for the last edge in each row), we can place the line where the fewest bricks will be crossed.
+
+Pseudocode:
+1. Create a map to track how many brick edges align at each point.
+2. For each row, add the cumulative width of bricks (skipping the last brick) to the map.
+3. Find the position where the most edges align.
+4. Return the total number of rows minus the number of aligned edges at that position.
+*/
 int leastBricks(vector<vector<int>>& wall) {
     unordered_map<long, long> openings;
     for (int r = 0; r < wall.size(); ++r) {
